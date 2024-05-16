@@ -1,0 +1,14 @@
+name: Pull Request Details
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  print_details:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Details
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Hello Details"
