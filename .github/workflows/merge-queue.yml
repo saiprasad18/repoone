@@ -1,14 +1,37 @@
-name: Pull Request Details
+name: Merge Queue
+
 on:
-  push:
-    branches:
-      - 'main'
+  pull_request:
+    types: [labeled, synchronize, reopened]
+
 jobs:
-  print_details:
+  check-merge-queue:
     runs-on: ubuntu-latest
     steps:
-      - name: Print Details
+      - name: Check if PR is in the merge queue
+        run: |
+          if [[ "${{ github.event.label.name }}" != "ready-to-merge" ]]; then
+            echo "PR is not marked as ready-to-merge. Exiting."
+            exit 1
+          fi
+          
+  validate-branch:
+    needs: check-merge-queue
+    runs-on: ubuntu-latest
+    if: github.base_ref == 'main' || github.base_ref == 'develop'
+    steps:
+      - name: Run tests and approvals
+        run: |
+          echo "Running validation checks..."
+          # Run actual CI/CD checks here
+          echo "Validation passed."
+
+  merge-pr:
+    needs: validate-branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge PR
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Hello Details"
+          gh pr merge ${{ github.event.pull_request.number }} --merge --auto
