@@ -17,13 +17,21 @@ jobs:
           else
             echo "ALLOW_MERGE_QUEUE=false" >> $GITHUB_ENV
           fi
+          
+      - name: Checkout Code
+        uses: actions/checkout@v4  # Ensures a git repository exists
 
+      - name: Authenticate GitHub CLI
+        run: gh auth status
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Add PR to Merge Queue (If Allowed)
         if: env.ALLOW_MERGE_QUEUE == 'true'
         run: |
           gh pr merge --merge --auto ${{ github.event.pull_request.number }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Block Merge (If Not Allowed)
         if: env.ALLOW_MERGE_QUEUE == 'false'
