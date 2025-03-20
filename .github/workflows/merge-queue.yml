@@ -29,7 +29,7 @@ jobs:
       - name: Add PR to Merge Queue (If Allowed)
         if: env.ALLOW_MERGE_QUEUE == 'true'
         run: |
-          gh pr merge --merge --auto ${{ github.event.pull_request }}
+          gh pr merge --merge --auto ${{ github.event.pull_request.html_url }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
