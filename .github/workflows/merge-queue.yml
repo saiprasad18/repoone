@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Check if PR is in the merge queue
         run: |
-          if [[ "${{ github.event.label.name }}" != "ready-to-merge" ]]; then
+          if [[ "${{ github.event.label.name }}" != "Merge pull request" ]]; then
             echo "PR is not marked as ready-to-merge. Exiting."
             exit 1
           fi
