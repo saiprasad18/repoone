@@ -14,14 +14,12 @@ jobs:
 
       - name: Check if PR has 'Merge pull request' label
         run: |
+          echo "{JSON_STRING}" | jq
           LABELS=$(jq -r '.pull_request.labels[].name' <<< "${{ toJson(github.event) }}")
           if [[ -z "$LABELS" ]]; then
             echo "PR does not have 'Merge pull request' label. Exiting."
             exit 1
           fi
-      - name: Debug GitHub event payload
-        run: echo '${{ toJSON(github.event) }}' | jq '.'
-
 
   validate-branch:
     needs: check-merge-queue
