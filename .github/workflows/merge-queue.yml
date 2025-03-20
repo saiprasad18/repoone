@@ -15,10 +15,15 @@ jobs:
 
       - name: Check if PR has 'Merge pull request' label
         run: |
-          LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name' | grep -Fx 'Merge pull request' || true)
-          if [[ -z "$LABELS" ]]; then
+          LABELS_JSON='${{ toJson(github.event.pull_request.labels) }}'
+          echo "Extracted Labels JSON: $LABELS_JSON"
+          LABEL_FOUND=$(echo "$LABELS_JSON" | jq -r '.[].name' | grep -x 'Merge pull request' || true)
+
+          if [[ -z "$LABEL_FOUND" ]]; then
             echo "PR does not have 'Merge pull request' label. Exiting."
             exit 1
+          else
+            echo "PR has 'Merge pull request' label. Proceeding..."
           fi
 
   validate-branch:
