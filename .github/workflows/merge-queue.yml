@@ -8,15 +8,28 @@ jobs:
   check-merge-queue:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug - Show Full Event Data
+        run: |
+          echo: "GitHub Event JSON:"
+          echo '${{ toJson(github.event) }}'
+          
       - name: Debug - Show PR Labels
         run: |
           echo "PR Labels:"
           echo '${{ toJson(github.event.pull_request.labels) }}'
 
-      - name: Check if PR has 'Merge pull request' label
+      - name: Fetch PR Labels
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          LABELS_JSON='${{ toJson(github.event.pull_request.labels) }}'
-          echo "Extracted Labels JSON: $LABELS_JSON"
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          REPO=${{ github.repository }}
+
+          LABELS_JSON=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$REPO/issues/$PR_NUMBER/labels")
+
+          echo "Fetched Labels JSON: $LABELS_JSON"
+
           LABEL_FOUND=$(echo "$LABELS_JSON" | jq -r '.[].name' | grep -x 'Merge pull request' || true)
 
           if [[ -z "$LABEL_FOUND" ]]; then
@@ -25,6 +38,7 @@ jobs:
           else
             echo "PR has 'Merge pull request' label. Proceeding..."
           fi
+
 
   validate-branch:
     needs: check-merge-queue
