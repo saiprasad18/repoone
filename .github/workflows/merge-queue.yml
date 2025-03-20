@@ -9,7 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Debug - Show PR Labels
-        run: echo "PR Labels: ${{ toJson(github.event.pull_request.labels) }}"
+        run: |
+          echo "PR Labels:"
+          echo '${{ toJson(github.event.pull_request.labels) }}'
 
       - name: Check if PR has 'Merge pull request' label
         run: |
