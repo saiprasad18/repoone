@@ -8,14 +8,14 @@ jobs:
   check-merge-queue:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch PR Labels
+      - name: Debug - Show PR Labels
         run: |
-          echo "PR Labels: $(jq -r '.pull_request.labels[].name' <<< '${{ toJson(github.event.pull_request) }}')"
+          echo "PR Labels:"
+          echo '${{ toJson(github.event.pull_request.labels) }}'
 
       - name: Check if PR has 'Merge pull request' label
         run: |
-          echo "{JSON_STRING}" | jq
-          LABELS=$(jq -r '.pull_request.labels[].name' <<< "${{ toJson(github.event) }}")
+          LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name' | grep -Fx 'Merge pull request' || true)
           if [[ -z "$LABELS" ]]; then
             echo "PR does not have 'Merge pull request' label. Exiting."
             exit 1
