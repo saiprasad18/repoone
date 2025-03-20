@@ -2,28 +2,32 @@ name: Merge Queue
 
 on:
   pull_request:
-    types: [labeled, synchronize, reopened]
+    types: [opened, labeled, synchronize, reopened]
 
 jobs:
   check-merge-queue:
     runs-on: ubuntu-latest
     steps:
-      - name: Check if PR is in the merge queue
+      - name: Debug - Show PR Labels
+        run: echo "PR Labels: ${{ toJson(github.event.pull_request.labels) }}"
+
+      - name: Check if PR has 'Merge pull request' label
         run: |
-          if [[ "${{ github.event.label.name }}" != "Merge pull request" ]]; then
-            echo "PR is not marked as ready-to-merge. Exiting."
+          LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | grep -o '"name": *"Merge pull request"' || true)
+          if [[ -z "$LABELS" ]]; then
+            echo "PR does not have 'Merge pull request' label. Exiting."
             exit 1
           fi
-          
+
   validate-branch:
     needs: check-merge-queue
     runs-on: ubuntu-latest
-    if: github.base_ref == 'main' || github.base_ref == 'develop'
+    if: contains(fromJson('["main", "develop"]'), github.event.pull_request.base.ref)
     steps:
       - name: Run tests and approvals
         run: |
           echo "Running validation checks..."
-          # Run actual CI/CD checks here
+          # Add actual CI/CD checks here
           echo "Validation passed."
 
   merge-pr:
